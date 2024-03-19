@@ -1,4 +1,4 @@
-package com.os.controller;
+package com.os.pojo;
 
 public class PCB {
     private String processId; // 进程ID

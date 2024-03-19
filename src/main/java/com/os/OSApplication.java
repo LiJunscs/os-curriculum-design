@@ -11,6 +11,8 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 @SpringBootApplication
 public class OSApplication {
     public static void main(String[] args) {
+        // TODO 中断初始化
+        // TODO 内存初始化
         SpringApplication.run(OSApplication.class, args);
     }
 }

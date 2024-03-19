@@ -1,7 +1,10 @@
 package com.os.service.impl;
 
+import com.os.pojo.PCB;
 import com.os.service.ProcessService;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 /**
  * @author: lj
@@ -10,4 +13,13 @@ import org.springframework.stereotype.Service;
  **/
 @Service
 public class ProcessServiceImpl implements ProcessService {
+    @Override
+    public PCB getProcessDetail(String processId) {
+        return null;
+    }
+
+    @Override
+    public List<PCB> getAllProcesses() {
+        return null;
+    }
 }

@@ -24,12 +24,12 @@ public class Result {
     }
 
 
-    public static Result success() {
-        return new Result(1, "操作成功");
+    public static Result success(String msg) {
+        return new Result(1, msg);
     }
 
-    public static Result success(Object data) {
-        return new Result(1, "操作成功", data);
+    public static Result success(String msg, Object data) {
+        return new Result(1, msg, data);
     }
 
     public static Result fail(String errorInfo) {
