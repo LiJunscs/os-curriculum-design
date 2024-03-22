@@ -15,6 +15,6 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(Exception.class)
     public Result handleException(Exception e){
         e.printStackTrace();
-        return Result.fail(StringUtils.hasLength(e.getMessage())? e.getMessage() : "操作失败");
+        return Result.fail("操作失败", StringUtils.hasLength(e.getMessage())? e.getMessage() : "操作失败");
     }
 }

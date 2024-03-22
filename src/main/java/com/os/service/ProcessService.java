@@ -13,4 +13,10 @@ public interface ProcessService {
     PCB getProcessDetail(String processId);
 
     List<PCB> getAllProcesses();
+
+    PCB createProcess(Integer priority, Integer pageCount, List<String> commands);
+
+    Boolean terminalProcess(Integer pid);
+
+    Integer dispatch();
 }

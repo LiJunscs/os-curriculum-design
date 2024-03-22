@@ -1,13 +1,14 @@
 package com.os.controller;
 
 import com.os.pojo.FCB;
-import com.os.pojo.PCB;
 import com.os.pojo.Result;
-import com.os.service.FileService;
+import com.os.service.FileSystemService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author: lj
@@ -25,54 +26,120 @@ public class FileController {
      * private StorageService storageService;
      */
     @Autowired
-    private FileService fileService;
+    FileSystemService FSService;
 
     @PostMapping("/createFile")
-    public Result createFile(@RequestBody FCB fcb) {
-        // TODO: 创建文件
-        // 不返回FCB
-        return Result.success("文件创建成功");
-    }
+    public Result createFile(@RequestBody Map<String, String> params){
+        String new_file_path = params.get("new_file_path");
+        //需要完整路径
+        HashMap<String, String> IR = new HashMap<>();
+        IR.put("operator","createFile");
+        Object res = FSService.pathToOP(new_file_path,IR);
+        if(res instanceof FCB){
+            return Result.success("文件创建成功！");
+        }
+        else if(res.equals(-1)){
+            return Result.fail("文件创建失败！","文件名称已存在！");
+        }else{
+            return Result.fail("文件创建失败！","文件名称不能为root！");
+        }
 
-    @DeleteMapping("/delete/{fileId}")
-    public Result deleteFile(@PathVariable("fileId") String fileId) {
-        // TODO: 删除文件
-        fileService.deleteFile(fileId);
-        return Result.success("文件删除成功");
     }
-
     @PostMapping("/createFolder")
-    public Result createFolder(@RequestBody FCB fcb) {
-        // TODO: 创建文件夹
-        // 不返回文件夹
-        return Result.success("文件夹创建成功");
+    public Result createFolder(@RequestBody Map<String, String> params){
+        String new_folder_path = params.get("new_folder_path");
+        //需要完整路径
+        HashMap<String, String> IR = new HashMap<>();
+        IR.put("operator","createFolder");
+        Object res = FSService.pathToOP(new_folder_path,IR);
+        if(res instanceof FCB){
+            return Result.success("文件夹创建成功！");
+        }
+        else if(res.equals(-1)){
+            return Result.fail("文件夹创建失败！","文件夹名称已存在！");
+        }else {
+            return Result.fail("文件夹创建失败！","文件夹名称不能为root！");
+        }
+    }
+    @GetMapping("/readFile")
+    public Result readFile(@RequestParam String file_path){
+        //需要完整路径
+        HashMap<String, String> IR = new HashMap<>();
+        IR.put("operator","readFile");
+        Object res = FSService.pathToOP(file_path,IR);
+        if(res.equals(-1)){
+            return Result.fail("文件读取失败！","文件权限不够！");
+        }else {
+            return Result.success("文件读取成功！",res);
+        }
+    }
+
+    @DeleteMapping("/deleteFile")
+    public Result deleteFile(@RequestParam String file_path){
+        //需要完整路径
+        HashMap<String, String> IR = new HashMap<>();
+        IR.put("operator","deleteFile");
+        Object res = FSService.pathToOP(file_path,IR);
+        if(res.equals(0)){
+            return Result.fail("文件删除失败！","文件不存在！");
+        }else {
+            return Result.success("文件删除成功！");
+        }
+    }
+    @PutMapping("/update")
+    //TODO 参数是否合理
+    public Result updateFile(@RequestBody Map<String, String> params){
+        String file_path = params.get("file_path");
+        String content = params.get("content");
+        HashMap<String, String> IR = new HashMap<>();
+        IR.put("operator","updateFile");
+        IR.put("content",content);
+        int res = (int) FSService.pathToOP(file_path,IR);
+        if(res == -1){
+            return Result.fail("文件更新失败！","没有写入权限！");
+        }else {
+            return Result.success("文件更新成功！");
+        }
+    }
+    @PutMapping("/rename")
+    //TODO 参数是否合理
+    public Result renameFile(@RequestBody Map<String, String> params){
+        String file_path = params.get("file_path");
+        String newName = params.get("newName");
+        HashMap<String, String> IR = new HashMap<>();
+        IR.put("operator","rename");
+        IR.put("newName",newName);
+        int res = (int) FSService.pathToOP(file_path,IR);
+        if(res == -1){
+            return Result.fail("重命名失败！","该名称已存在！");
+        }else {
+            return Result.success("重命名成功！");
+        }
     }
 
     @GetMapping("/list")
-    public Result listFiles() {
-        // TODO: 获取文件树
-        List<FCB> fileList = fileService.getAllFiles();
-        return Result.success("获取文件树成功", fileList);
+    public Result listFiles(@RequestParam String file_path) {
+        HashMap<String, String> IR = new HashMap<>();
+        IR.put("operator","list");
+        List<FCB> file_tree = (List<FCB>) FSService.pathToList(file_path,IR);
+        if (file_tree.isEmpty()){
+            return Result.success("目录为空",file_tree);
+        }
+        return Result.success("获取目录下文件成功", file_tree);
     }
 
-    @GetMapping("/read/{fileId}")
-    public Result readFile(@PathVariable("fileId") String fileId) {
-        // TODO: 读取文件
-        PCB fileContent = fileService.readFile(fileId);
-        return Result.success("读取文件成功", fileContent);
-    }
-
-    @PutMapping("/update")
-    public Result updateFile(@RequestBody FCB fcb) {
-        // TODO: 修改文件
-        fileService.updateFile(fcb);
-        return Result.success("写入文件成功");
-    }
-
-    @PutMapping("/rename")
-    public Result renameFile(@RequestBody FCB fcb) {
-        // TODO: 重命名
-        fileService.renameFile(fcb);
-        return Result.success("重命名成功");
+    @PutMapping("/changeAuthority")
+    public Result changeAuthority(@RequestBody Map<String, String> params) {
+        String file_path = params.get("file_path");
+        String authority = params.get("authority");
+        HashMap<String, String> IR = new HashMap<>();
+        IR.put("operator", "changeAuthority");
+        IR.put("authority",authority );
+        int res = (int) FSService.pathToOP(file_path, IR);
+        if (res == 0) {
+            return Result.fail("权限更新失败！", "没有该文件！");
+        } else {
+            return Result.success("权限更新成功！");
+        }
     }
 }

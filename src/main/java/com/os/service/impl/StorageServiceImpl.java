@@ -10,4 +10,8 @@ import org.springframework.stereotype.Service;
  **/
 @Service
 public class StorageServiceImpl implements StorageService {
+    @Override
+    public Integer alloc(Integer pageCount) {
+        return null;
+    }
 }
